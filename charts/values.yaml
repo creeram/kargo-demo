@@ -1,0 +1,3 @@
+image:
+  repository: your-docker-registry/your-image
+  tag: v2.0.0     # Update this to the new image version/tag
