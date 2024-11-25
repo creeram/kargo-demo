@@ -5,4 +5,4 @@ resources:
 - service.yaml
 images:
 - name: harbor.teamgamdom.com/gamdom/images/staging
-  newTag: pr-2970-eng-3055-casino-new-swiml
+  newTag: pr-2938-eng-2549-pragmatic-play-p
