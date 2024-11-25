@@ -1,3 +1,3 @@
 image:
   repository: harbor.teamgamdom.com/gamdom/images/staging
-  tag: v2.0.0     # Update this to the new image version/tag
+  tag: pr-2938-eng-2549-pragmatic-play-p
