@@ -8,13 +8,13 @@ spec:
     matchLabels:
       app: kargo-demo
   template:
-    metadata:
+    metadata:.
       labels:
         app: kargo-demo
     spec:
       containers:
       - name: nginx 
-        image: public.ecr.aws/nginx/nginx:placeholder
+        image: harbor.teamgamdom.com/gamdom/images/staging:placeholder
         volumeMounts:
         - name: content
           mountPath: /usr/share/nginx/html
