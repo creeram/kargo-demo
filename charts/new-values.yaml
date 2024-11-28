@@ -22,3 +22,14 @@ spec:
 
     ingress:
       host: demo.example.com
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: gamdom-game-e2e
+spec:
+  interval: 10m
+  type: oci
+  url: oci://harbor.teamgamdom.com/gamdom-game-integration/helmcharts/branch-master
+  secretRef:
+    name: harbor-registry
