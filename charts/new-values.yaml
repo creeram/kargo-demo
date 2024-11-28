@@ -16,7 +16,7 @@ spec:
   values:
     game: plinko
     override_game_client_image: harbor.teamgamdom.com/gamdom/images/staging:pr-2956-eng-3285-rewards-misc-cha
-    override_game_server_image: test
+    override_game_server_image: harbor.teamgamdom.com/gamdom/images/staging:pr-2956-eng-3285-rewards-misc-cha
     imagePullSecrets:
       - name: demo-registry
 
