@@ -5,4 +5,4 @@ resources:
 - service.yaml
 images:
 - name: harbor.teamgamdom.com/gamdom/images/staging
-  newTag: pr-2911-eng-2763-users-can-comple
+  newTag: pr-2980-hotfix-footer-vilnius-com
