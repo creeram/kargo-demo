@@ -1,0 +1,35 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: demo-game
+spec:
+  interval: 10m
+  type: oci
+  url: oci://test
+  secretRef:
+    name: demo-registry
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: demo
+spec:
+  interval: 12h0m0s # refresh rarely to prevent frequent reload of service
+  upgrade:
+    force: true
+  chart:
+    spec:
+      chart: demo-game
+      sourceRef:
+        kind: HelmRepository
+        name: test
+  values:
+    game: plinko
+    override_game_client_image: test
+    override_game_server_image: test
+    imagePullSecrets:
+      - name: demo-registry
+
+    ingress:
+      host: demo.example.com
