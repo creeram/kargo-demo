@@ -15,7 +15,7 @@ spec:
         name: test
   values:
     game: plinko
-    override_game_client_image: harbor.teamgamdom.com/gamdom/images/staging:pr-2980-hotfix-footer-vilnius-com
+    override_game_client_image: harbor.teamgamdom.com/gamdom/images/staging:pr-2956-eng-3285-rewards-misc-cha
     override_game_server_image: test
     imagePullSecrets:
       - name: demo-registry
