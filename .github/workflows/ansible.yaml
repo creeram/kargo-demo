@@ -1,0 +1,31 @@
+name: Run Ansible Playbook
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  ansible-playbook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 29994 -H 77.92.145.78 >> ~/.ssh/known_hosts 
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Run Ansible Playbook
+        working-directory: ./ansible/ssh
+        run: |
+          ansible-playbook ssh.yaml
