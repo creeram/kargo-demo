@@ -1,0 +1,142 @@
+---
+- name: Install g++, required libraries, clone repository, run setup, and configure pam_oauth2_device
+  hosts: all
+  become: true
+  vars:
+    oauth_client_id: "{{ lookup('env', 'OAUTH_CLIENT_ID') }}"
+    oauth_client_secret: "{{ lookup('env', 'OAUTH_CLIENT_SECRET') }}"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install g++ package
+      apt:
+        name: g++
+        state: present
+
+    - name: Install additional development libraries
+      apt:
+        name:
+          - git
+          - make
+          - libldap2-dev
+          - libpam0g-dev
+          - libcurl4-openssl-dev
+        state: present
+
+    - name: Create the directory for the repository
+      file:
+        path: /home/ubuntu/pam_oauth2_device
+        state: directory
+        mode: '0755'
+
+    - name: Clone repository to /home/ubuntu
+      git:
+        repo: https://github.com/ICS-MU/pam_oauth2_device.git
+        dest: /home/ubuntu/pam_oauth2_device
+        clone: yes
+        update: yes
+
+    - name: Run make command in cloned repository directory
+      command:
+        cmd: make
+        chdir: /home/ubuntu/pam_oauth2_device
+
+    - name: Create /lib/security directory
+      file:
+        path: /lib/security
+        state: directory
+        mode: '0755'
+
+    - name: Copy pam_oauth2_device.so to /lib/security
+      copy:
+        src: /home/ubuntu/pam_oauth2_device/pam_oauth2_device.so
+        dest: /lib/security/pam_oauth2_device.so
+        mode: '0644'
+        remote_src: yes
+
+    - name: Create /etc/pam_oauth2_device directory
+      file:
+        path: /etc/pam_oauth2_device
+        state: directory
+        mode: '0755'
+
+    - name: Template config.json to /etc/pam_oauth2_device/config.json
+      template:
+        src: config.json.j2
+        dest: /etc/pam_oauth2_device/config.json
+        mode: '0644'
+
+    - name: Add pam_oauth2_device.so line to sshd PAM configuration
+      lineinfile:
+        path: /etc/pam.d/sshd
+        regexp: '^#?@include common-auth'
+        line: '# @include common-auth'
+        state: present
+
+    - name: Add new auth line for pam_oauth2_device in sshd PAM configuration
+      lineinfile:
+        path: /etc/pam.d/sshd
+        line: 'auth required pam_oauth2_device.so /etc/pam_oauth2_device/config.json'
+        state: present
+
+
+    - name: Comment out KbdInteractiveAuthentication no in sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^KbdInteractiveAuthentication\s+no'
+        line: '#KbdInteractiveAuthentication no'
+        state: present
+      become: yes
+
+
+    - name: Add KbdInteractiveAuthentication to sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'KbdInteractiveAuthentication yes'
+        state: present
+
+    - name: Add PasswordAuthentication to sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'PasswordAuthentication no'
+        state: present
+
+    - name: Add ChallengeResponseAuthentication to sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'ChallengeResponseAuthentication yes'
+        state: present
+
+    - name: Add AuthenticationMethods to sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'AuthenticationMethods keyboard-interactive'
+        state: present
+
+    - name: Add UsePAM to sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'UsePAM yes'
+        state: present
+
+    - name: Add Match User ubuntu to sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'Match User root'
+        state: present
+
+    - name: Add AuthenticationMethods publickey under Match User ubuntu to sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: '  AuthenticationMethods publickey'
+        state: present
+        insertafter: '^Match User root'
+
+    - name: Restart SSH service
+      systemd:
+        name: ssh
+        state: restarted
