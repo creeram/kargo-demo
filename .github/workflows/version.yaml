@@ -39,5 +39,3 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/actions/variables/VERSION \
             -d '{"name":"VERSION","value":"'"$NEW_VERSION"'"}'
 
-      - name: Verify Updated Version
-        run: echo "Updated Version is: $NEW_VERSION"
