@@ -47,7 +47,7 @@ jobs:
 
           # Stage and commit changes
           git add tools/k8s/staging/Chart.yaml
-          git commit -m "Increment Helm chart minor version to ${{ env.new_version }}" || echo "No changes to commit."
+          git commit -m "Bump Helm chart version to ${{ env.new_version }}" || echo "No changes to commit."
 
           # Push changes
           git push origin
