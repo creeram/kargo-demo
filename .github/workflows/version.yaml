@@ -1,0 +1,43 @@
+name: Update Version Variable
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Read Current Version from GitHub Variable
+        id: get_version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          response=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/variables/VERSION)
+          echo "CURRENT_VERSION=$(echo $response | jq -r '.value')" >> $GITHUB_ENV
+          echo "Current Version: $CURRENT_VERSION"
+
+      - name: Increment Patch Version
+        id: increment_version
+        run: |
+          # Extract major, minor, patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "New Version: $NEW_VERSION"
+
+      - name: Update GitHub Variable with New Version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X PATCH \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/variables/VERSION \
+            -d '{"name":"VERSION","value":"'"$NEW_VERSION"'"}'
+
+      - name: Verify Updated Version
+        run: echo "Updated Version is: $NEW_VERSION"
